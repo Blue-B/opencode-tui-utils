@@ -1,0 +1,44 @@
+{
+  "name": "opencode-tui-utils",
+  "version": "1.0.0",
+  "description": "Essential TUI utilities for opencode - disconnect provider, session bookmarks, and more",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "keywords": [
+    "opencode",
+    "tui",
+    "plugin",
+    "disconnect",
+    "session-bookmarks",
+    "utilities"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.14.42",
+    "@opentui/solid": ">=0.2.6"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "1.14.46",
+    "@opentui/solid": "^0.2.6",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/opencode-tui-utils.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/opencode-tui-utils/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/opencode-tui-utils#readme"
+}
