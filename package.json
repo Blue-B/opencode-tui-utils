@@ -1,24 +1,33 @@
 {
   "name": "opencode-tui-utils",
   "version": "1.0.0",
-  "description": "Essential TUI utilities for opencode - disconnect provider, session bookmarks, and more",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Add /disconnect command to opencode - safely disconnect providers without editing auth.json",
+  "main": "src/index.tsx",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit",
     "dev": "tsc --watch",
-    "test": "node --test dist/**/*.test.js"
+    "test": "npm run build",
+    "prepublishOnly": "npm run build"
   },
+  "files": [
+    "src",
+    "docs",
+    "README.md",
+    "README.*.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
   "keywords": [
     "opencode",
     "tui",
     "plugin",
     "disconnect",
-    "session-bookmarks",
-    "utilities"
+    "provider",
+    "auth",
+    "copilot"
   ],
-  "author": "Your Name",
+  "author": "Blue-B <source_vs@naver.com>",
   "license": "MIT",
   "peerDependencies": {
     "@opencode-ai/plugin": ">=1.14.42",
@@ -35,10 +44,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/opencode-tui-utils.git"
+    "url": "https://github.com/Blue-B/opencode-tui-utils.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/opencode-tui-utils/issues"
+    "url": "https://github.com/Blue-B/opencode-tui-utils/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/opencode-tui-utils#readme"
+  "homepage": "https://github.com/Blue-B/opencode-tui-utils#readme"
 }

@@ -1,34 +1,31 @@
 # Contributing to opencode-tui-utils
 
-Thank you for your interest in contributing! This guide explains how to add new TUI utilities to the package.
+Thank you for taking the time to improve `opencode-tui-utils`.
 
-## The Vision
-
-opencode-tui-utils is a **community-driven plugin ecosystem**. We want to be the go-to place for:
-- ✨ Missing opencode features
-- 🛠️ Workflow acceleration utilities
-- 🔌 Reusable TUI components
+This package is intentionally small. A good contribution should feel native to opencode's TUI, solve one clear problem, and avoid changing how opencode itself works.
 
 ## Before You Start
 
-- ✅ Ensure the feature **doesn't exist** in native opencode
-- ✅ Check [GitHub Issues](https://github.com/YOUR_USERNAME/opencode-tui-utils/issues) for similar work
-- ✅ Read the [Architecture](#architecture) section below
-- ✅ Understand the [API Wrapper](#api-wrapper) pattern
+- Check whether the feature already exists in opencode.
+- Check existing issues and pull requests for similar work.
+- Keep the first version of a command small enough to review and test manually.
+- Avoid new runtime dependencies unless they are clearly necessary.
 
-## Quick Start: Adding a New Plugin
+## Project Layout
 
-### Step 1: Plan Your Plugin
+```text
+src/
+  core/
+    api-wrapper.ts      Shared wrapper around the opencode TUI API
+  plugins/
+    disconnect.tsx      Current provider disconnect command
+    your-feature.tsx    New commands belong here
+  index.tsx             Public plugin entry point
+```
 
-Ask yourself:
-- **What problem does it solve?** (Be specific)
-- **Is it opencode-specific?** (If generic, maybe submit to npm separately)
-- **Does it need persistent storage?** (Use `api.kv`)
-- **Does it need file I/O?** (Use Node.js `fs/promises`)
+## Adding A Command
 
-### Step 2: Create the Plugin File
-
-Create `src/plugins/[your-feature].tsx`:
+Create a file in `src/plugins/`:
 
 ```typescript
 /** @jsxImportSource @opentui/solid */
@@ -36,24 +33,22 @@ import type { TuiPluginModule } from "@opencode-ai/plugin/tui"
 import { createWrappedAPI } from "../core/api-wrapper"
 
 const plugin: TuiPluginModule & { id: string } = {
-  id: "opencode-tui-utils.[your-feature]",
+  id: "opencode-tui-utils.your-feature",
   async tui(rawApi) {
-    // Always use the API wrapper for future compatibility!
     const api = createWrappedAPI(rawApi)
-    
+
     api.keymap.registerLayer({
       commands: [
         {
-          name: "opencode-tui-utils.[your-feature]",
-          title: "Your Feature Title",
-          category: "YourCategory",
+          name: "opencode-tui-utils.your-feature",
+          title: "Your Feature",
+          category: "Utility",
           namespace: "palette",
           slashName: "your-command",
           async run() {
-            // Your implementation here
             api.ui.toast({
-              title: "Hello",
-              message: "Your plugin works!",
+              title: "Ready",
+              message: "Your command ran successfully.",
             })
           },
         },
@@ -65,345 +60,97 @@ const plugin: TuiPluginModule & { id: string } = {
 export default plugin
 ```
 
-### Step 3: Register in Plugin Loader
-
-Edit `src/index.tsx`:
+Register it in `src/index.tsx`:
 
 ```typescript
-import yourPlugin from "./plugins/[your-feature]"
+import yourPlugin from "./plugins/your-feature"
 
-const plugins: TuiPluginModule[] = [
-  disconnectPlugin,
-  bookmarksPlugin,
-  yourPlugin,  // ← Add here
-]
+const plugins: TuiPluginModule[] = [disconnectPlugin, yourPlugin]
 ```
 
-### Step 4: Test Locally
+## API Wrapper
 
-1. **Copy built file** to your plugins folder:
-   ```bash
-   cp dist/plugins/[your-feature].js ~/.config/opencode/plugins/
-   ```
+Use `createWrappedAPI(rawApi)` in plugin files instead of calling the raw opencode API directly. This keeps API-specific changes isolated to `src/core/api-wrapper.ts` when possible.
 
-2. **Verify in `tui.json`**:
-   ```json
-   {
-     "plugins": [
-       "./plugins/[your-feature].tsx"
-     ]
-   }
-   ```
-
-3. **Test in opencode**:
-   ```bash
-   opencode
-   /your-command
-   ```
-
-### Step 5: Submit a PR
-
-See [Pull Request Guidelines](#pull-request-guidelines) below.
-
-## Architecture
-
-### API Wrapper Pattern
-
-**Why it matters:** opencode updates frequently. The API wrapper abstracts opencode API calls so breaking changes only affect one file.
-
-```
-Your Plugin
-    ↓
-API Wrapper (src/core/api-wrapper.ts)
-    ↓
-opencode TUI API
-    ↓
-opencode Core
-```
-
-**Always import from the wrapper:**
+Example:
 
 ```typescript
-// ❌ Don't do this
-const providers = await rawApi.kv.get("key")
-
-// ✅ Do this
 const api = createWrappedAPI(rawApi)
-const data = await api.kv.getJSON("key")
-```
 
-### File Structure
-
-```
-src/
-├── core/
-│   └── api-wrapper.ts          ← Don't touch this (maintainers only)
-├── plugins/
-│   ├── disconnect.tsx          ← Example plugin
-│   ├── bookmarks.tsx           ← Example plugin  
-│   └── [your-feature].tsx      ← Your new plugin here
-├── utils/
-│   └── [shared-helpers].ts     ← Optional shared utilities
-└── index.tsx                   ← Register your plugin here
-```
-
-### Styling & Components
-
-Use **SolidJS components** from opencode's TUI API:
-
-```typescript
-// Available components
-const { DialogSelect, DialogAlert } = api.ui
-
-// Example: Show a dialog
-api.ui.dialog.replace(() => (
-  <DialogSelect
-    title="Choose something"
-    options={[
-      { title: "Option 1", value: "opt1" },
-      { title: "Option 2", value: "opt2" },
-    ]}
-    onSelect={(option) => {
-      // Handle selection
-    }}
-  />
-))
-
-// Example: Show a toast notification
 api.ui.toast({
-  variant: "success",    // "success", "error", "warning", "info"
-  title: "Done!",
-  message: "Operation completed successfully",
+  variant: "success",
+  message: "Done",
 })
 ```
 
-## Common Patterns
+## KV Storage
 
-### Pattern 1: Using KV Storage
-
-```typescript
-// Store data
-await api.kv.setJSON("my-key", { name: "value" })
-
-// Retrieve data
-const data = await api.kv.getJSON("my-key")
-if (!data) {
-  console.log("No data found")
-}
-
-// Delete data
-await api.kv.delete("my-key")
-```
-
-### Pattern 2: File I/O
+The wrapper currently supports `get`, `set`, `getJSON`, and `setJSON`.
 
 ```typescript
-import { readFile, writeFile } from "node:fs/promises"
+await api.kv.setJSON("my-feature.settings", { enabled: true })
 
-// Read
-const content = await readFile("/path/to/file", "utf-8")
-
-// Write
-await writeFile("/path/to/file", "new content")
+const settings = await api.kv.getJSON<{ enabled: boolean }>(
+  "my-feature.settings",
+)
 ```
 
-### Pattern 3: Multiple Commands
+The current opencode TUI KV API does not expose delete. If you need deletion semantics, store an updated object without the removed field.
 
-```typescript
-api.keymap.registerLayer({
-  commands: [
-    {
-      name: "feature.cmd1",
-      slashName: "cmd1",
-      async run() { /* ... */ }
-    },
-    {
-      name: "feature.cmd2",
-      slashName: "cmd2",
-      async run() { /* ... */ }
-    },
-  ],
-})
-```
+## Local Testing
 
-### Pattern 4: Error Handling
+Type-check the package:
 
-```typescript
-async run() {
-  try {
-    const data = await someAsyncOperation()
-    api.ui.toast({
-      variant: "success",
-      title: "Success!",
-      message: data
-    })
-  } catch (error) {
-    api.ui.dialog.replace(() => (
-      <DialogAlert
-        title="Error"
-        message={error instanceof Error ? error.message : "Unknown error"}
-      />
-    ))
-  }
-}
-```
-
-## Pull Request Guidelines
-
-### Before You PR
-
-- [ ] Plugin works in opencode (tested locally)
-- [ ] No breaking changes to existing commands
-- [ ] Follows the API Wrapper pattern
-- [ ] Has JSDoc comments for public functions
-- [ ] Handles errors gracefully
-- [ ] Uses `opencode-tui-utils` namespace
-
-### PR Title Format
-
-```
-feat: Add /your-command for feature description
-fix: Fix /existing-command bug
-docs: Update installation guide
-refactor: Improve API wrapper
-test: Add tests for feature
-```
-
-### PR Description
-
-```markdown
-## What does this PR do?
-Clear explanation of the feature or fix.
-
-## How to test
-1. Copy the file to plugins folder
-2. Run `/your-command`
-3. Verify X, Y, Z happen
-
-## Breaking changes?
-None / Describe if any
-
-## Closes
-#issue-number (if applicable)
-```
-
-### Code Review
-
-- We'll review within 48 hours
-- Feedback will be constructive and actionable
-- Minor style issues might be auto-fixed by maintainers
-- Large changes might need architectural discussion
-
-### Merge & Release
-
-Once approved:
-1. We'll merge your PR
-2. Add you to CONTRIBUTORS.md
-3. Bump version (semantic versioning)
-4. Release new npm package
-
-## Plugin Ideas
-
-These are good candidates for PRs:
-
-### Category: Provider Management
-- [ ] `api-quick-switch` - Quickly switch between configured providers
-- [ ] `token-expiry-checker` - Show token expiry times
-- [ ] `provider-status` - Health check for connected providers
-
-### Category: Session Management
-- [ ] `session-export` - Export session to different formats (JSON, markdown)
-- [ ] `session-search` - Full-text search across sessions
-- [ ] `session-stats` - Show session statistics and usage patterns
-
-### Category: Debugging
-- [ ] `debug-logs` - Pretty-print opencode logs
-- [ ] `performance-monitor` - Show resource usage
-- [ ] `error-history` - Recent errors and solutions
-
-### Category: Workflow
-- [ ] `quick-project` - Jump to project folder quickly
-- [ ] `model-finder` - Search available models by capabilities
-- [ ] `config-validator` - Validate opencode configuration
-
-## Testing
-
-For now, manual testing is required. We're working on automated tests.
-
-**How to test your plugin:**
 ```bash
-# 1. Build
+npm install
 npm run build
-
-# 2. Copy to plugins
-cp dist/plugins/[feature].js ~/.config/opencode/plugins/
-
-# 3. Test in opencode
-opencode
-/your-command
-
-# 4. Check for errors
-opencode --print-logs
 ```
 
-## Documentation
+To test a command in opencode before publishing, reference the source file from `~/.config/opencode/tui.json`:
 
-Every plugin needs:
-- **JSDoc comments** on all public functions
-- **README section** in the main README.md
-- **Usage examples** in CONTRIBUTING.md
-- **Comments** explaining complex logic
-
-```typescript
-/**
- * My awesome utility
- * 
- * @param id - The session ID to process
- * @returns Whether the operation succeeded
- * 
- * @example
- * const result = await myFunction("ses_123")
- * console.log(result) // true
- */
-async function myFunction(id: string): Promise<boolean> {
-  // Implementation
+```json
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": ["/absolute/path/to/opencode-tui-utils/src/plugins/your-feature.tsx"]
 }
 ```
 
-## Getting Help
+Then restart opencode and run the slash command.
 
-- **API Questions**: Check `@opencode-ai/plugin/dist/tui.d.ts` type definitions
-- **Design Questions**: Open a GitHub Discussion
-- **Bug Reports**: Open an Issue with steps to reproduce
-- **General Help**: Ask in opencode Discord #plugins channel
+## Pull Requests
 
-## Code of Conduct
+- Describe the user-facing problem the change solves.
+- Include manual testing steps.
+- Update `README.md` if the command is user-facing.
+- Update localized README files when changing install, compatibility, or command behavior.
+- Keep unrelated formatting and refactors out of feature PRs.
 
-- Be respectful and constructive
-- Assume good intent
-- Help others learn
-- Report harassment to maintainers
+Suggested PR title format:
+
+```text
+feat: add /your-command
+fix: handle missing auth file in /disconnect
+docs: clarify plugin installation
+```
+
+## Command Scope
+
+Good fits for this package:
+
+| Idea | Why |
+| --- | --- |
+| Provider quick switch | Small TUI-native provider utility. |
+| Session favorites | Helps navigate opencode sessions without changing core behavior. |
+| Config sanity checks | Useful local diagnostics with clear output. |
+
+Poor fits:
+
+| Idea | Why |
+| --- | --- |
+| Agent orchestration | Better handled by dedicated workflow plugins. |
+| Prompt packs | Better as opencode commands or separate repositories. |
+| Provider backends | Should be maintained as provider-specific plugins. |
 
 ## License
 
-By contributing, you agree that your code will be released under the MIT License (same as this project).
-
----
-
-## FAQ
-
-**Q: How long until my PR is merged?**  
-A: We aim for 48-72 hour review. High-quality PRs are merged faster.
-
-**Q: What if opencode changes the TUI API?**  
-A: Update the wrapper layer (`api-wrapper.ts`) in a new version. All plugins automatically work with the new API.
-
-**Q: Can I use external npm packages?**  
-A: Keep dependencies minimal. Avoid heavy packages. Ask maintainers first.
-
-**Q: What about backwards compatibility?**  
-A: Don't remove or rename commands users rely on. Add new ones instead.
-
----
-
-Thank you for helping make opencode better! 🙏
+By contributing, you agree that your contribution will be released under the MIT License.

@@ -1,21 +1,17 @@
 /**
  * OpenCode TUI Utils - Plugin Loader
- * 
- * 모든 플러그인을 한 번에 로드합니다
  */
 
 import type { TuiPluginModule } from "@opencode-ai/plugin/tui"
 import disconnectPlugin from "./plugins/disconnect"
-import bookmarksPlugin from "./plugins/bookmarks"
+import lspTogglePlugin from "./plugins/lsp-toggle"
 
-const plugins: TuiPluginModule[] = [disconnectPlugin, bookmarksPlugin]
+const plugins: TuiPluginModule[] = [disconnectPlugin, lspTogglePlugin]
 
-export async function initializePlugins(api: Parameters<TuiPluginModule["tui"]>[0]) {
+export async function initializePlugins(...args: Parameters<TuiPluginModule["tui"]>) {
   for (const plugin of plugins) {
     try {
-      if (plugin.tui) {
-        await plugin.tui(api)
-      }
+      await plugin.tui(...args)
     } catch (error) {
       console.error(`Failed to initialize plugin:`, error)
     }
@@ -24,8 +20,8 @@ export async function initializePlugins(api: Parameters<TuiPluginModule["tui"]>[
 
 const mainPlugin: TuiPluginModule & { id: string } = {
   id: "opencode-tui-utils",
-  async tui(api) {
-    await initializePlugins(api)
+  async tui(...args: Parameters<TuiPluginModule["tui"]>) {
+    await initializePlugins(...args)
   },
 }
 

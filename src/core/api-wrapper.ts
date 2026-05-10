@@ -1,9 +1,8 @@
 /**
  * OpenCode TUI API Wrapper
  * 
- * API 변경에 대비한 래퍼 레이어
- * - opencode 버전 업데이트 시 여기만 수정하면 됨
- * - 모든 플러그인이 자동으로 호환성 유지
+ * Keeps opencode TUI API calls behind a small local layer so API-specific
+ * changes are easier to isolate.
  */
 
 import type { TuiPluginApi } from "@opencode-ai/plugin/tui"
@@ -15,8 +14,7 @@ export interface WrappedAPI {
 }
 
 /**
- * Keymap API 래퍼
- * /disconnect, /faves 같은 명령어 등록
+ * Keymap API wrapper for slash commands and palette commands.
  */
 export function createKeymapAPI(api: TuiPluginApi) {
   return {
@@ -27,8 +25,7 @@ export function createKeymapAPI(api: TuiPluginApi) {
 }
 
 /**
- * UI API 래퍼
- * DialogSelect, DialogAlert, Toast 등
+ * UI API wrapper for dialogs and toasts.
  */
 export function createUIAPI(api: TuiPluginApi) {
   return {
@@ -43,21 +40,21 @@ export function createUIAPI(api: TuiPluginApi) {
     toast: (options: Parameters<typeof api.ui.toast>[0]) => {
       return api.ui.toast(options)
     },
-    // DialogSelect, DialogAlert는 직접 api.ui에서 가져옴 (재내보내기)
+    // Re-export UI components used by plugins.
     DialogSelect: api.ui.DialogSelect,
+    DialogConfirm: api.ui.DialogConfirm,
     DialogAlert: api.ui.DialogAlert,
   }
 }
 
 /**
- * KV Storage API 래퍼
- * 세션 북마크 저장/로드용
+ * KV storage wrapper for future commands that need persistence.
  */
 export function createKVAPI(api: TuiPluginApi) {
   return {
     get: async (key: string): Promise<string | undefined> => {
       try {
-        return await api.kv.get(key)
+        return api.kv.get<string | undefined>(key)
       } catch (error) {
         console.error(`Failed to get KV key "${key}":`, error)
         return undefined
@@ -65,21 +62,14 @@ export function createKVAPI(api: TuiPluginApi) {
     },
     set: async (key: string, value: string): Promise<void> => {
       try {
-        await api.kv.set(key, value)
+        api.kv.set(key, value)
       } catch (error) {
         console.error(`Failed to set KV key "${key}":`, error)
       }
     },
-    delete: async (key: string): Promise<void> => {
-      try {
-        await api.kv.delete(key)
-      } catch (error) {
-        console.error(`Failed to delete KV key "${key}":`, error)
-      }
-    },
     getJSON: async <T = unknown>(key: string): Promise<T | undefined> => {
       try {
-        const value = await api.kv.get(key)
+        const value = api.kv.get<string | undefined>(key)
         return value ? JSON.parse(value) : undefined
       } catch (error) {
         console.error(`Failed to parse JSON from KV key "${key}":`, error)
@@ -88,7 +78,7 @@ export function createKVAPI(api: TuiPluginApi) {
     },
     setJSON: async <T = unknown>(key: string, value: T): Promise<void> => {
       try {
-        await api.kv.set(key, JSON.stringify(value))
+        api.kv.set(key, JSON.stringify(value))
       } catch (error) {
         console.error(`Failed to set JSON to KV key "${key}":`, error)
       }
@@ -97,8 +87,7 @@ export function createKVAPI(api: TuiPluginApi) {
 }
 
 /**
- * 메인 래퍼 함수
- * 모든 플러그인에서 사용
+ * Main wrapper used by plugins.
  */
 export function createWrappedAPI(api: TuiPluginApi): WrappedAPI {
   return {

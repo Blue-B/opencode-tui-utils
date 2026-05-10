@@ -1,13 +1,20 @@
 /** @jsxImportSource @opentui/solid */
 import type { TuiPluginModule } from "@opencode-ai/plugin/tui"
+import { homedir } from "node:os"
+import { join } from "node:path"
 import { readFile, writeFile } from "node:fs/promises"
 import { createWrappedAPI } from "../core/api-wrapper"
 
-const AUTH_PATH = "/home/shell/.local/share/opencode/auth.json"
+function getAuthPath() {
+  if (process.env.OPENCODE_AUTH_PATH) return process.env.OPENCODE_AUTH_PATH
+
+  const dataHome = process.env.XDG_DATA_HOME ?? join(homedir(), ".local", "share")
+  return join(dataHome, "opencode", "auth.json")
+}
 
 async function loadAuth() {
   try {
-    const content = await readFile(AUTH_PATH, "utf-8")
+    const content = await readFile(getAuthPath(), "utf-8")
     return JSON.parse(content) as Record<string, { type: string }>
   } catch (error) {
     console.error("Failed to load auth:", error)
@@ -17,7 +24,7 @@ async function loadAuth() {
 
 async function saveAuth(data: Record<string, unknown>) {
   try {
-    await writeFile(AUTH_PATH, JSON.stringify(data, null, 2))
+    await writeFile(getAuthPath(), JSON.stringify(data, null, 2))
   } catch (error) {
     console.error("Failed to save auth:", error)
     throw error
@@ -27,7 +34,6 @@ async function saveAuth(data: Record<string, unknown>) {
 const plugin: TuiPluginModule & { id: string } = {
   id: "opencode-tui-utils.disconnect",
   async tui(rawApi) {
-    // API 래퍼 사용 (향후 호환성 대비)
     const api = createWrappedAPI(rawApi)
     const { DialogSelect, DialogAlert } = api.ui
 
@@ -72,14 +78,28 @@ const plugin: TuiPluginModule & { id: string } = {
                 options={options}
                 onSelect={(option) => {
                   if (!option) return
-                  delete data[option.value]
-                  saveAuth(data)
-                  api.ui.dialog.clear()
-                  api.ui.toast({
-                    variant: "success",
-                    title: "Disconnected",
-                    message: `Removed ${option.value}`,
-                  })
+
+                  void (async () => {
+                    const nextData = { ...data }
+                    delete nextData[option.value]
+
+                    try {
+                      await saveAuth(nextData)
+                      api.ui.dialog.clear()
+                      api.ui.toast({
+                        variant: "success",
+                        title: "Disconnected",
+                        message: `Removed ${option.value}`,
+                      })
+                    } catch {
+                      api.ui.dialog.replace(() => (
+                        <DialogAlert
+                          title="Error"
+                          message="Could not update authentication file."
+                        />
+                      ))
+                    }
+                  })()
                 }}
               />
             ))

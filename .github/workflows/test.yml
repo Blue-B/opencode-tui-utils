@@ -1,4 +1,4 @@
-name: Compatibility & Build Tests
+name: Build
 
 on:
   push:
@@ -15,10 +15,10 @@ jobs:
         node-version: [18.x, 20.x]
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -31,31 +31,20 @@ jobs:
       
       - name: Check plugin structure
         run: |
-          if [ ! -f "dist/plugins/disconnect.js" ]; then
-            echo "ERROR: disconnect.js not found"
+          if [ ! -f "src/plugins/disconnect.tsx" ]; then
+            echo "ERROR: disconnect.tsx not found"
             exit 1
           fi
-          if [ ! -f "dist/plugins/bookmarks.js" ]; then
-            echo "ERROR: bookmarks.js not found"
-            exit 1
-          fi
-          echo "✓ All plugin files generated successfully"
-      
-      - name: Upload build artifacts
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts-node${{ matrix.node-version }}
-          path: dist/
+          echo "Plugin structure verified"
 
   lint:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
@@ -64,16 +53,15 @@ jobs:
         run: npm ci
       
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run build
       
       - name: Check code structure
         run: |
           echo "Checking for API wrapper usage..."
-          # Ensure plugins use createWrappedAPI
           if ! grep -r "createWrappedAPI" src/plugins/ > /dev/null; then
             echo "WARNING: Not all plugins use API wrapper"
           else
-            echo "✓ API wrapper usage verified"
+            echo "API wrapper usage verified"
           fi
       
       - name: Check JSDoc comments
@@ -87,27 +75,25 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Validate package.json compatibility settings
         run: |
           node -e "
           const pkg = require('./package.json');
           
-          // Check peerDependencies
           if (!pkg.peerDependencies || !pkg.peerDependencies['@opencode-ai/plugin']) {
             console.error('Missing @opencode-ai/plugin in peerDependencies');
             process.exit(1);
           }
           
-          // Check minimum version
           const version = pkg.peerDependencies['@opencode-ai/plugin'];
           if (!version.includes('>=1.14.42')) {
             console.error('Minimum opencode version must be >=1.14.42');
             process.exit(1);
           }
           
-          console.log('✓ Compatibility settings valid');
+          console.log('Compatibility settings valid');
           console.log('  - Min opencode: ' + version);
           console.log('  - Current dev version: ' + pkg.devDependencies['@opencode-ai/plugin']);
           "
@@ -121,9 +107,9 @@ jobs:
       - name: Check job status
         if: failure()
         run: |
-          echo "❌ One or more checks failed"
+          echo "One or more checks failed"
           exit 1
       
       - name: Success
         if: success()
-        run: echo "✅ All checks passed"
+        run: echo "All checks passed"

@@ -1,0 +1,13 @@
+node_modules/
+tsconfig.json
+.github/
+*.log
+.DS_Store
+.env
+.env.local
+.idea/
+.vscode/
+*.swp
+*.swo
+.git
+.gitignore

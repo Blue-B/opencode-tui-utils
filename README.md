@@ -1,242 +1,193 @@
-# opencode-tui-utils
+# opencode TUI Utils
 
-**Essential TUI utilities for opencode** - a collection of powerful, battle-tested TUI plugins designed to enhance your opencode workflow.
+English | [한국어](./README.ko.md) | [日本語](./README.ja.md) | [中文](./README.zh.md)
 
-> The first community-driven TUI plugin package for opencode with extensible architecture. Zero dependencies beyond opencode itself.
+<p align="center">
+  <img src="docs/banner.png" alt="opencode-tui-utils" width="860">
+</p>
 
-## Features
+[![npm version](https://img.shields.io/npm/v/opencode-tui-utils?style=flat-square)](https://www.npmjs.com/package/opencode-tui-utils)
+[![Build](https://img.shields.io/github/actions/workflow/status/Blue-B/opencode-tui-utils/test.yml?branch=main&style=flat-square)](https://github.com/Blue-B/opencode-tui-utils/actions)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-### 🔌 `/disconnect` - Smart Provider Management
-Quickly disconnect authentication providers without manual file editing.
+Small native-feeling TUI utilities for [opencode](https://opencode.ai). The first command adds a safe provider disconnect flow, so you can remove one connected provider without editing `auth.json` by hand.
 
-```bash
-/disconnect      # Interactive provider selection
-/dc             # Quick alias
+This project is built to grow command by command. Each utility should solve one focused opencode TUI problem and stay easy to review, test, and remove.
+
+## Preview
+
+```text
+> /disconnect
+
+Select provider to disconnect
+
+  github       copilot-free
+> anthropic   claude-pro
+  openai      api-key
+
+Enter disconnects the selected provider.
 ```
 
-**What it does:**
-- Shows all connected providers with their types
-- Safely removes only the selected provider
-- Instant feedback on success/failure
+The command uses opencode's own TUI dialog components, so it appears inside the same command palette and dialog flow instead of launching a separate script.
 
-### 📌 `/faves` - Session Bookmarks (Coming Soon)
-Bookmark your favorite project sessions for instant access.
+## Why use opencode TUI Utils
+
+| Need | What you get |
+| --- | --- |
+| Remove one provider safely | Select a provider in the TUI and remove only that auth entry |
+| Avoid manual JSON edits | No need to open or hand-edit `~/.local/share/opencode/auth.json` |
+| Keep tokens private | Provider names and auth types are shown, token values are never printed |
+| Add more small commands | Shared plugin loader and API wrapper make new utilities straightforward |
+
+## Quick Start
+
+Install from npm with opencode's plugin installer:
 
 ```bash
-/faves          # View bookmarked sessions  
-/fav            # Quick alias
-/bookmarks      # Alternative command
+opencode plugin opencode-tui-utils
 ```
 
-**What it does:**
-- Persist session bookmarks across opencode restarts
-- Interactive selection interface
-- Quick navigation to frequently used projects
+That command installs the package and updates your opencode config. If you manage the config manually, make sure `~/.config/opencode/tui.json` includes:
 
-## Installation
+```json
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": ["opencode-tui-utils"]
+}
+```
 
-### Quick Start
+Restart opencode and run:
 
-1. **Ensure you're on opencode 1.14.42+**
-   ```bash
-   opencode --version
-   ```
+```text
+/disconnect
+```
 
-2. **Create plugin directory** (if not exists)
-   ```bash
-   mkdir -p ~/.config/opencode/plugins
-   ```
+## Commands
 
-3. **Copy this plugin** to your plugins folder:
-   - Option A: Copy the `.tsx` files directly
-   - Option B: Install via npm (coming soon)
+| Command | Alias | Description |
+| --- | --- | --- |
+| `/disconnect` | `/dc` | Pick one connected provider and remove it from opencode auth storage. |
+| `/lsp-toggle` | — | Toggle `lsp: true/false` in `~/.config/opencode/opencode.json`. Requires opencode restart. |
 
-4. **Register in `~/.config/opencode/tui.json`**
-   ```json
-   {
-     "plugins": [
-       "./plugins/disconnect.tsx",
-       "./plugins/bookmarks.tsx"
-     ]
-   }
-   ```
+## How `/disconnect` works
 
-5. **Restart opencode** and test:
-   ```bash
-   /disconnect
-   /faves
-   ```
+`/disconnect` reads your opencode auth file, lists the provider keys, and rewrites the same file after removing the one provider you selected.
+
+Example auth shape:
+
+```json
+{
+  "github": { "type": "copilot-free" },
+  "anthropic": { "type": "api-key" },
+  "openai": { "type": "api-key" }
+}
+```
+
+If you select `github`, only the top-level `github` key is removed. Other provider entries stay untouched.
+
+This started from the provider disconnect pain point discussed in [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494).
+
+## Data Storage
+
+| Data | Location | Notes |
+| --- | --- | --- |
+| Provider auth | `~/.local/share/opencode/auth.json` | The selected provider key is removed from this file |
+| Custom auth path | `OPENCODE_AUTH_PATH=/path/to/auth.json` | Optional override for non-standard setups |
+| Plugin source | npm package / opencode plugin cache | No external service is contacted by `/disconnect` |
+
+`/disconnect` does not send network requests, copy token values, or print token values to the UI.
+
+## Adding More Utilities
+
+New commands are added as separate plugin modules under `src/plugins/` and registered from `src/index.tsx`.
+
+```text
+src/
+  core/
+    api-wrapper.ts      Shared wrapper around the opencode TUI API
+  plugins/
+    disconnect.tsx      Provider disconnect command
+    lsp-toggle.tsx      LSP toggle command
+    your-command.tsx    Add new utilities here
+  index.tsx             Public plugin entry point
+```
+
+Minimal command shape:
+
+```typescript
+/** @jsxImportSource @opentui/solid */
+import type { TuiPluginModule } from "@opencode-ai/plugin/tui"
+import { createWrappedAPI } from "../core/api-wrapper"
+
+const plugin: TuiPluginModule & { id: string } = {
+  id: "opencode-tui-utils.your-command",
+  async tui(rawApi) {
+    const api = createWrappedAPI(rawApi)
+
+    api.keymap.registerLayer({
+      commands: [
+        {
+          name: "opencode-tui-utils.your-command",
+          title: "Your Command",
+          category: "Utility",
+          namespace: "palette",
+          slashName: "your-command",
+          async run() {
+            api.ui.toast({ message: "Command ran successfully." })
+          },
+        },
+      ],
+    })
+  },
+}
+
+export default plugin
+```
+
+Then register it in `src/index.tsx`:
+
+```typescript
+import yourCommand from "./plugins/your-command"
+
+const plugins: TuiPluginModule[] = [disconnectPlugin, lspTogglePlugin, yourCommand]
+```
+
+Use `createWrappedAPI(rawApi)` for opencode TUI APIs. It keeps API-specific changes easier to isolate when opencode updates its plugin API.
+
+## Development
+
+```bash
+git clone https://github.com/Blue-B/opencode-tui-utils.git
+cd opencode-tui-utils
+npm install
+npm run build
+```
+
+Local source-file testing:
+
+```json
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": ["/absolute/path/to/opencode-tui-utils/src/plugins/disconnect.tsx"]
+}
+```
+
+Restart opencode after changing `tui.json`.
 
 ## Compatibility
 
-| opencode Version | Status | Notes |
-|-----------------|--------|-------|
-| 1.14.46         | ✅ Tested | Current stable |
-| 1.14.42+        | ✅ OK | Minimum version |
-| 1.15.x          | 🧪 Testing | Report issues! |
-| <1.14.42        | ❌ Not supported | API missing |
+Tested with:
 
-**How we ensure compatibility:**
+| Tool | Version |
+| --- | --- |
+| opencode | 1.14.46 |
 
-- **API Wrapper Layer** (`src/core/api-wrapper.ts`) - All opencode API calls go through a single abstraction layer
-- **CI/CD Testing** - Automatically tested against the latest opencode releases
-- **Version Pinning** - `peerDependencies` specify compatible opencode versions
-- **Rapid Updates** - Issues trigger fast patch releases
-
-If you encounter problems after an opencode update:
-1. Check [GitHub Issues](https://github.com/YOUR_USERNAME/opencode-tui-utils/issues)
-2. Report with your `opencode --version` output
-3. We'll investigate and release a fix within 24 hours
-
-## Usage
-
-### Disconnect Provider
-```bash
-opencode
-/disconnect
-
-# Select provider from list with arrow keys
-# Press Enter to disconnect
-# Confirmation toast appears
-```
-
-**Safe features:**
-- Read-only display of provider types
-- User must confirm selection
-- Selective removal (only selected provider)
-- Rollback possible (manually re-auth)
-
-### Bookmarked Sessions (Coming Soon)
-```bash
-opencode
-/faves
-
-# See all bookmarked sessions
-# Select one to view details
-```
-
-## Architecture
-
-**Why this matters for you:**
-
-```
-opencode updates frequently
-    ↓
-API signatures might change
-    ↓
-Our API Wrapper catches breaking changes
-    ↓
-You always get working plugins
-```
-
-### Project Structure
-```
-src/
-├── core/
-│   └── api-wrapper.ts      ← Single source of truth for API
-├── plugins/
-│   ├── disconnect.tsx      ← Provider disconnect logic
-│   └── bookmarks.tsx       ← Session bookmarking
-├── utils/
-│   └── (future utilities)
-└── index.tsx               ← Plugin loader
-```
-
-## Building from Source
-
-### Development
-```bash
-# Install dependencies
-npm install
-
-# Build TypeScript
-npm run build
-
-# Watch mode
-npm run dev
-
-# Test
-npm run test
-```
-
-### Output
-```
-dist/
-├── plugins/
-│   ├── disconnect.js
-│   ├── disconnect.d.ts
-│   ├── bookmarks.js
-│   └── bookmarks.d.ts
-├── core/
-│   └── api-wrapper.js
-└── index.js
-```
+The package declares `@opencode-ai/plugin >=1.14.42` as a peer dependency because it uses opencode's TUI Plugin API.
 
 ## Contributing
 
-We welcome community contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for:
-- How to build new TUI utilities
-- Plugin architecture guidelines
-- Pull request process
-- Code examples
-
-**Examples of plugins you could add:**
-- `api-quick-switch` - Quickly switch between API providers
-- `session-export` - Export session logs to different formats
-- `token-manager` - Safe token rotation utilities
-- `debug-utils` - Debugging and troubleshooting helpers
-
-## FAQ
-
-### Q: Does this work with opencode cloud?
-**A:** Yes! Works with both local and cloud installations.
-
-### Q: Will my plugins break when opencode updates?
-**A:** Unlikely! We use an API wrapper layer that absorbs changes. See [Compatibility](#compatibility) for details.
-
-### Q: Can I disable individual plugins?
-**A:** Yes, remove the file from `~/.config/opencode/plugins/` or comment it out in `tui.json`.
-
-### Q: How is this different from custom markdown commands?
-**A:** 
-- ✅ No LLM dependency
-- ✅ Faster execution
-- ✅ Access to native TUI components
-- ✅ Persistent storage (KV API)
-- ✅ Real-time file I/O
-
-### Q: What happens if opencode removes the TUI plugin API?
-**A:** Unlikely, but we're positioned as a "community-driven bridge" until native implementations land.
-
-## Status & Roadmap
-
-- [x] `/disconnect` command
-- [ ] `/faves` session bookmarks  
-- [ ] `/fave-add` bookmark current session
-- [ ] `/fave-remove` remove bookmarks
-- [ ] Droid CLI-style interactive UI
-- [ ] Unit tests
-- [ ] npm package
-- [ ] GitHub Actions CI/CD
-
-## Support
-
-- **GitHub Issues**: [Report bugs](https://github.com/YOUR_USERNAME/opencode-tui-utils/issues)
-- **Discussions**: [Feature requests & ideas](https://github.com/YOUR_USERNAME/opencode-tui-utils/discussions)
-- **opencode Community**: [Discord](https://discord.gg/opencode) #plugins channel
+Issues and PRs are welcome. Please keep changes small and focused. See [CONTRIBUTING.md](CONTRIBUTING.md) before adding a new command.
 
 ## License
 
-MIT License - see LICENSE file for details
-
-## Acknowledgments
-
-- opencode team for the powerful TUI plugin API
-- Community users reporting issues and suggesting features
-- Contributors submitting PRs and improvements
-
----
-
-**Made with ❤️ for the opencode community**
-
-*First-mover advantage in the TUI plugin ecosystem. Help us make it better!*
+MIT
