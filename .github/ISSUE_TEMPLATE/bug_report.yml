@@ -1,0 +1,63 @@
+name: Bug Report
+description: Report a bug or unexpected behavior.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly.
+      placeholder: "When I run /disconnect and select a provider, ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Provide the exact steps to trigger the bug.
+      placeholder: |
+        1. Run opencode
+        2. Type /disconnect
+        3. Select "github"
+        4. See error
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: opencode version
+      description: Output of `opencode --version`
+      placeholder: "1.14.46"
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version (if applicable)
+      placeholder: "20.x"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Paste any error messages or screenshots.
+      render: text
+
+  - type: checkboxes
+    id: check
+    attributes:
+      label: Checklist
+      options:
+        - label: I checked that this bug has not already been reported.
+          required: true
+        - label: I am using the latest version of this plugin.
+          required: true

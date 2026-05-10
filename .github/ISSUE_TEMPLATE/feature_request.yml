@@ -1,0 +1,44 @@
+name: Feature Request
+description: Suggest a new command or improvement.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for a new TUI utility? Let us know.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What problem does this solve?
+      description: Explain the pain point or missing feature.
+      placeholder: "I often need to switch between providers quickly without re-authenticating."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the command or behavior you want.
+      placeholder: "Add a /provider-switch command that lists connected providers and lets me pick one to activate."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Did you consider other ways to solve this?
+      placeholder: "I tried editing the auth file manually, but it's error-prone."
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This is a small, TUI-native utility (not an agent framework or prompt pack).
+          required: true
+        - label: It does not change how opencode itself works.
+          required: true
