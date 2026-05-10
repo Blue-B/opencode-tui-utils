@@ -172,16 +172,6 @@ npm run build
 
 `tui.json` 변경 후에는 opencode를 재시작해야 합니다.
 
-## 호환성
-
-테스트한 환경입니다.
-
-| 도구 | 버전 |
-| --- | --- |
-| opencode | 1.14.46 |
-
-이 패키지는 opencode의 TUI Plugin API를 사용하므로 peer dependency로 `@opencode-ai/plugin >=1.14.42`를 선언합니다.
-
 ## 기여
 
 이슈와 PR은 환영합니다. 새 명령어를 추가하기 전에는 [CONTRIBUTING.md](CONTRIBUTING.md)를 확인해 주세요. 작고 명확한 변경을 선호합니다.

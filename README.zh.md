@@ -121,16 +121,6 @@ npm install
 npm run build
 ```
 
-## 兼容性
-
-已测试环境：
-
-| 工具 | 版本 |
-| --- | --- |
-| opencode | 1.14.46 |
-
-这个包使用 opencode 的 TUI Plugin API，因此将 `@opencode-ai/plugin >=1.14.42` 声明为 peer dependency。
-
 ## 贡献
 
 欢迎 issue 和 PR。添加新命令前请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。更推荐小而清晰的改动。

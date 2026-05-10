@@ -178,16 +178,6 @@ Local source-file testing:
 
 Restart opencode after changing `tui.json`.
 
-## Compatibility
-
-Tested with:
-
-| Tool | Version |
-| --- | --- |
-| opencode | 1.14.46 |
-
-The package declares `@opencode-ai/plugin >=1.14.42` as a peer dependency because it uses opencode's TUI Plugin API.
-
 ## Contributing
 
 Issues and PRs are welcome. Please keep changes small and focused. See [CONTRIBUTING.md](CONTRIBUTING.md) before adding a new command.
