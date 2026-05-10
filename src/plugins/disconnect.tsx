@@ -89,7 +89,7 @@ const plugin: TuiPluginModule & { id: string } = {
                       api.ui.toast({
                         variant: "success",
                         title: "Disconnected",
-                        message: `Removed ${option.value}`,
+                        message: `Removed ${option.value}. Open a new session to reflect the change.`,
                       })
                     } catch {
                       api.ui.dialog.replace(() => (

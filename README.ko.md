@@ -16,17 +16,13 @@
 
 ## 미리보기
 
-```text
-> /disconnect
+<p align="center">
+  <img src="docs/preview-command.png" alt="/disconnect 명령 선택" width="600">
+</p>
 
-Select provider to disconnect
-
-  github       copilot-free
-> anthropic   claude-pro
-  openai      api-key
-
-Enter disconnects the selected provider.
-```
+<p align="center">
+  <img src="docs/preview-result.png" alt="프로바이더 해제 완료" width="600">
+</p>
 
 실제 화면은 opencode의 TUI dialog 컴포넌트를 사용합니다. 별도 스크립트를 실행하는 방식이 아니라 opencode 안의 명령 팔레트와 dialog 흐름에서 자연스럽게 동작합니다.
 
@@ -66,7 +62,7 @@ opencode를 재시작한 뒤 실행합니다.
 
 | 명령어 | 별칭 | 설명 |
 | --- | --- | --- |
-| `/disconnect` | `/dc` | 연결된 프로바이더 중 하나를 선택해 opencode 인증 저장소에서 제거합니다. |
+| `/disconnect` | `/dc` | 연결된 프로바이더 중 하나를 선택해 opencode 인증 저장소에서 제거합니다. 새 세션을 열어야 변경 사항이 반영됩니다. |
 | `/lsp-toggle` | — | `~/.config/opencode/opencode.json`의 `lsp` 설정을 true/false로 전환합니다. opencode 재시작 필요. |
 
 ## `/disconnect` 동작 방식
@@ -84,6 +80,8 @@ opencode를 재시작한 뒤 실행합니다.
 ```
 
 여기서 `github`를 선택하면 최상위 `github` 키만 제거됩니다. `anthropic`, `openai` 같은 다른 프로바이더 항목은 그대로 유지됩니다.
+
+> **참고:** opencode는 세션 시작 시 인증 파일을 읽습니다. 해제 후에는 새로운 opencode 창이나 세션을 열어야 업데이트된 프로바이더 목록이 반영됩니다.
 
 처음 시작점은 [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494)에서 다뤄진 프로바이더 해제 불편함이었습니다.
 

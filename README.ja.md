@@ -16,17 +16,13 @@
 
 ## プレビュー
 
-```text
-> /disconnect
+<p align="center">
+  <img src="docs/preview-command.png" alt="/disconnect コマンド選択" width="600">
+</p>
 
-Select provider to disconnect
-
-  github       copilot-free
-> anthropic   claude-pro
-  openai      api-key
-
-Enter disconnects the selected provider.
-```
+<p align="center">
+  <img src="docs/preview-result.png" alt="プロバイダー切断完了" width="600">
+</p>
 
 実際の画面ではopencodeのTUI dialogコンポーネントを使います。外部スクリプトではなく、opencodeのコマンドパレットとdialogの流れの中で動作します。
 
@@ -66,7 +62,7 @@ opencodeを再起動して実行します。
 
 | コマンド | エイリアス | 説明 |
 | --- | --- | --- |
-| `/disconnect` | `/dc` | 接続済みプロバイダーを1つ選び、opencodeの認証ストレージから削除します。 |
+| `/disconnect` | `/dc` | 接続済みプロバイダーを1つ選び、opencodeの認証ストレージから削除します。新しいセションを開くと変更が反映されます。 |
 | `/lsp-toggle` | — | `~/.config/opencode/opencode.json` の `lsp` 設定を true/false に切り替えます。opencodeの再起動が必要です。 |
 
 ## `/disconnect` の動作
@@ -84,6 +80,8 @@ opencodeを再起動して実行します。
 ```
 
 `github`を選択した場合、トップレベルの`github`キーだけが削除されます。`anthropic`や`openai`など他のプロバイダーは残ります。
+
+> **注意:** opencodeはセション開始時に認証ファイルを読み込みます。切断後は新しいopencodeウィンドウまたはセションを開くと、更新されたプロバイダー一覧が反映されます。
 
 出発点は [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494) で話されていたプロバイダー解除の不便さでした。
 

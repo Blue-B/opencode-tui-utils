@@ -16,17 +16,13 @@
 
 ## 预览
 
-```text
-> /disconnect
+<p align="center">
+  <img src="docs/preview-command.png" alt="/disconnect 命令选择" width="600">
+</p>
 
-Select provider to disconnect
-
-  github       copilot-free
-> anthropic   claude-pro
-  openai      api-key
-
-Enter disconnects the selected provider.
-```
+<p align="center">
+  <img src="docs/preview-result.png" alt="Provider 断开确认" width="600">
+</p>
 
 实际界面使用 opencode 的 TUI dialog 组件，所以它在 opencode 的命令面板和 dialog 流程中运行，而不是额外启动脚本。
 
@@ -66,7 +62,7 @@ opencode plugin opencode-tui-utils
 
 | 命令 | 别名 | 说明 |
 | --- | --- | --- |
-| `/disconnect` | `/dc` | 选择一个已连接的 provider，并从 opencode 的认证存储中移除。 |
+| `/disconnect` | `/dc` | 选择一个已连接的 provider，并从 opencode 的认证存储中移除。需要打开新会话才能看到变更。 |
 | `/lsp-toggle` | — | 切换 `~/.config/opencode/opencode.json` 中的 `lsp` 设置。需要重启 opencode。 |
 
 ## `/disconnect` 如何工作
@@ -84,6 +80,8 @@ opencode plugin opencode-tui-utils
 ```
 
 如果选择 `github`，只会删除顶层的 `github` key。`anthropic`、`openai` 等其他 provider 会保持不变。
+
+> **注意：** opencode 在会话启动时读取认证文件。断开连接后，需要打开新的 opencode 窗口或会话才能看到更新后的 provider 列表。
 
 它最初来自 [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494) 中提到的 provider 断开问题。
 

@@ -16,17 +16,13 @@ This project is built to grow command by command. Each utility should solve one 
 
 ## Preview
 
-```text
-> /disconnect
+<p align="center">
+  <img src="docs/preview-command.png" alt="/disconnect command selection" width="600">
+</p>
 
-Select provider to disconnect
-
-  github       copilot-free
-> anthropic   claude-pro
-  openai      api-key
-
-Enter disconnects the selected provider.
-```
+<p align="center">
+  <img src="docs/preview-result.png" alt="Provider disconnected confirmation" width="600">
+</p>
 
 The command uses opencode's own TUI dialog components, so it appears inside the same command palette and dialog flow instead of launching a separate script.
 
@@ -66,7 +62,7 @@ Restart opencode and run:
 
 | Command | Alias | Description |
 | --- | --- | --- |
-| `/disconnect` | `/dc` | Pick one connected provider and remove it from opencode auth storage. |
+| `/disconnect` | `/dc` | Pick one connected provider and remove it from opencode auth storage. Open a new session to reflect the change. |
 | `/lsp-toggle` | — | Toggle `lsp: true/false` in `~/.config/opencode/opencode.json`. Requires opencode restart. |
 
 ## How `/disconnect` works
@@ -84,6 +80,8 @@ Example auth shape:
 ```
 
 If you select `github`, only the top-level `github` key is removed. Other provider entries stay untouched.
+
+> **Note:** opencode reads the auth file at session start. After disconnecting, open a new opencode window or session to see the updated provider list.
 
 This started from the provider disconnect pain point discussed in [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494).
 
@@ -154,6 +152,12 @@ const plugins: TuiPluginModule[] = [disconnectPlugin, lspTogglePlugin, yourComma
 
 Use `createWrappedAPI(rawApi)` for opencode TUI APIs. It keeps API-specific changes easier to isolate when opencode updates its plugin API.
 
+## Tips
+
+### Switching model variants (xhigh / high / max)
+
+Use `Ctrl + T` in the TUI to cycle through reasoning variants for the current model. To switch models entirely, use `Ctrl + X` then `M`, or type `/models`.
+
 ## Development
 
 ```bash
@@ -190,4 +194,6 @@ Issues and PRs are welcome. Please keep changes small and focused. See [CONTRIBU
 
 ## License
 
-MIT
+[MIT](LICENSE) — Blue-B © 2026
+
+You are free to use, modify, and distribute this project, including for commercial purposes. The only requirement is to keep the copyright notice and license text included in any copies or substantial portions.
