@@ -48,6 +48,7 @@ export function createUIAPI(api: TuiPluginApi) {
     DialogSelect: api.ui.DialogSelect,
     DialogConfirm: api.ui.DialogConfirm,
     DialogAlert: api.ui.DialogAlert,
+    DialogPrompt: api.ui.DialogPrompt,
   }
 }
 

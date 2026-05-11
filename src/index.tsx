@@ -9,8 +9,9 @@ import pluginListPlugin from "./plugins/plugin-list"
 import exportChatPlugin from "./plugins/export-chat"
 import sessionDiffPlugin from "./plugins/session-diff"
 import sessionTodosPlugin from "./plugins/session-todos"
+import permissionsPlugin from "./plugins/permissions"
 
-const plugins: TuiPluginModule[] = [disconnectPlugin, lspTogglePlugin, pluginListPlugin, exportChatPlugin, sessionDiffPlugin, sessionTodosPlugin]
+const plugins: TuiPluginModule[] = [disconnectPlugin, lspTogglePlugin, pluginListPlugin, exportChatPlugin, sessionDiffPlugin, sessionTodosPlugin, permissionsPlugin]
 
 export async function initializePlugins(...args: Parameters<TuiPluginModule["tui"]>) {
   for (const plugin of plugins) {
