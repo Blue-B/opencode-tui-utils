@@ -10,9 +10,9 @@ English | [한국어](./README.ko.md) | [日本語](./README.ja.md) | [中文](.
 [![Build](https://img.shields.io/github/actions/workflow/status/Blue-B/opencode-tui-utils/test.yml?branch=main&style=flat-square)](https://github.com/Blue-B/opencode-tui-utils/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-Small native-feeling TUI utilities for [opencode](https://opencode.ai). The first command adds a safe provider disconnect flow, so you can remove one connected provider without editing `auth.json` by hand.
+Essential TUI commands missing from [opencode](https://opencode.ai). Install once, stop editing JSON by hand.
 
-This project is built to grow command by command. Each utility should solve one focused opencode TUI problem and stay easy to review, test, and remove.
+This project is built to grow command by command. Each utility exposes data the TUI already holds but lacks a quick slash-command shortcut for (pattern established by [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494)).
 
 ## Preview
 
@@ -33,7 +33,7 @@ The command uses opencode's own TUI dialog components, so it appears inside the 
 | Remove one provider safely | Select a provider in the TUI and remove only that auth entry |
 | Avoid manual JSON edits | No need to open or hand-edit `~/.local/share/opencode/auth.json` |
 | Keep tokens private | Provider names and auth types are shown, token values are never printed |
-| Add more small commands | Shared plugin loader and API wrapper make new utilities straightforward |
+| Add more small commands | Shared plugin loader and API wrapper make new utilities straightforward. [See command ideas →](CONTRIBUTING.md#command-ideas-up-for-grabs) |
 
 ## Quick Start
 
@@ -60,10 +60,25 @@ Restart opencode and run:
 
 ## Commands
 
+### Available
+
 | Command | Alias | Description |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | Pick one connected provider and remove it from opencode auth storage. Open a new session to reflect the change. |
 | `/lsp-toggle` | — | Toggle `lsp: true/false` in `~/.config/opencode/opencode.json`. Requires opencode restart. |
+| `/plugin-list` | — | Show installed plugins and their activation state. |
+| `/export-chat` | — | Export the current session chat to a markdown file in the project directory. |
+| `/session-diff` | — | List files changed in the current session. |
+| `/session-todos` | — | Show pending todos for the current session. |
+
+### Ideas & Contributions Welcome
+
+These are verified gaps where the TUI already holds the data but offers no slash-command shortcut. Pick one and open an issue.
+
+| Command | Problem it Solves |
+| --- | --- |
+| `/provider-list` | "What's connected right now?" — read-only counterpart to `/disconnect` |
+| `/session-info` | "How many messages in this session? What's the status?" |
 
 ## How `/disconnect` works
 
@@ -109,6 +124,8 @@ src/
     your-command.tsx    Add new utilities here
   index.tsx             Public plugin entry point
 ```
+
+**Want to build one?** Check the [Command Ideas](CONTRIBUTING.md#command-ideas-up-for-grabs) list in `CONTRIBUTING.md`. Each idea exposes data the TUI already has but lacks a slash-command shortcut for.
 
 Minimal command shape:
 

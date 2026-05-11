@@ -2,14 +2,16 @@
 
 Thank you for taking the time to improve `opencode-tui-utils`.
 
-This package is intentionally small. A good contribution should feel native to opencode's TUI, solve one clear problem, and avoid changing how opencode itself works.
+**Goal:** Provide essential TUI commands missing from opencode. Install once, stop editing JSON by hand.
+
+A good contribution feels native to opencode's TUI, solves one clear problem, and never changes how opencode itself works.
 
 ## Before You Start
 
-- Check whether the feature already exists in opencode.
-- Check existing issues and pull requests for similar work.
-- Keep the first version of a command small enough to review and test manually.
-- Avoid new runtime dependencies unless they are clearly necessary.
+1. **Check opencode built-ins first.** Native slash commands include `/connect`, `/init`, `/undo`, `/redo`, `/share`, `/models`. Native shortcuts include `Ctrl+T` (variant cycle) and `Ctrl+X` then `M` (model switch). We only add what is missing.
+2. **Check existing issues and pull requests** for similar work.
+3. **Keep the first version small.** One focused command is easier to review and test than a bundle.
+4. **Avoid new runtime dependencies.** The project ships zero deps for a reason.
 
 ## Project Layout
 
@@ -133,23 +135,32 @@ fix: handle missing auth file in /disconnect
 docs: clarify plugin installation
 ```
 
-## Command Scope
+## What Makes a Good Command
 
-Good fits for this package:
+The best commands expose data the TUI already has but offers no quick slash-command shortcut for. Think of the pain point behind [opencode issue #10494](https://github.com/anomalyco/opencode/issues/10494): the UI showed a connected provider, but there was no way to disconnect it without hand-editing JSON.
 
-| Idea | Why |
-| --- | --- |
-| Provider quick switch | Small TUI-native provider utility. |
-| Session favorites | Helps navigate opencode sessions without changing core behavior. |
-| Config sanity checks | Useful local diagnostics with clear output. |
+**Great fit checklist:**
+- **TUI-native end-to-end.** No external terminal windows. Use palettes, dialogs, toasts, and selects.
+- **One clear frustration.** "I have to open a config file to toggle this," or "I can't see X without clicking three menus."
+- **Read-only or local-only.** Prefer commands that read from `api.state.*`, `api.plugins.list()`, or local config files. Avoid network calls when possible.
+- **Doesn't touch opencode core.** We only change user configs or session state that opencode already exposes to plugins.
 
-Poor fits:
+**Not a great fit:**
+- Agent orchestration, prompt packs, or provider backends — these belong in dedicated plugins or opencode core.
+- Heavy external services or large new dependencies.
 
-| Idea | Why |
-| --- | --- |
-| Agent orchestration | Better handled by dedicated workflow plugins. |
-| Prompt packs | Better as opencode commands or separate repositories. |
-| Provider backends | Should be maintained as provider-specific plugins. |
+## Command Ideas (Up for Grabs)
+
+These are verified gaps based on the plugin API. Feel free to pick one and open an issue before starting.
+
+| Command | Problem it Solves | API Source |
+| --- | --- | --- |
+| `/provider-list` | "What's connected right now?" before or after `/disconnect` | `api.state.provider` |
+| `/session-info` | "How many messages in this session? What's the status?" | `api.state.session.*` |
+
+**Already covered by opencode built-ins — do not propose:** theme switch, MCP/LSP status viewers, clipboard copy. The TUI already provides these.
+
+If you have a new idea, open an issue with the problem statement first. We'll confirm it doesn't duplicate a built-in before you start coding.
 
 ## License
 

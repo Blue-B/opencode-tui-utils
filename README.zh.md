@@ -10,9 +10,9 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/Blue-B/opencode-tui-utils/test.yml?branch=main&style=flat-square)](https://github.com/Blue-B/opencode-tui-utils/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-面向 [opencode](https://opencode.ai) TUI 的小型工具集。第一个命令是 `/disconnect`，用于安全地断开一个已连接的 provider，不需要手动编辑 `auth.json`。
+opencode 缺少的必备 TUI 命令。安装一次，再也不用亲手编辑 JSON。
 
-这个项目按“一个命令解决一个问题”的方式扩展。每个工具都应该聚焦于一个 opencode TUI 场景，并保持容易审查、测试和移除。
+这个项目逐个添加命令。每个工具的目标都是公开 opencode TUI 已经拥有但无法通过斜杠命令访问的数据（opencode issue #10494 的模式）。
 
 ## 预览
 
@@ -60,10 +60,25 @@ opencode plugin opencode-tui-utils
 
 ## 命令
 
+### 可用
+
 | 命令 | 别名 | 说明 |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | 选择一个已连接的 provider，并从 opencode 的认证存储中移除。需要打开新会话才能看到变更。 |
 | `/lsp-toggle` | — | 切换 `~/.config/opencode/opencode.json` 中的 `lsp` 设置。需要重启 opencode。 |
+| `/plugin-list` | — | 显示已安装的插件及其激活状态。 |
+| `/export-chat` | — | 将当前会话的聊天记录导出为项目目录中的 Markdown 文件。 |
+| `/session-diff` | — | 列出当前会话中已更改的文件。 |
+| `/session-todos` | — | 显示当前会话的待办事项列表。 |
+
+### 欢迎提交想法与贡献
+
+这些候选命令公开 TUI 已有但缺少斜杠命令快捷方式的数据。有喜欢的想法请开 Issue。
+
+| 命令 | 解决的问题 |
+| --- | --- |
+| `/provider-list` | "现在连接了什么？" — `/disconnect` 的只读版本 |
+| `/session-info` | "这个会话有多少条消息？状态是什么？" |
 
 ## `/disconnect` 如何工作
 
@@ -97,7 +112,7 @@ opencode plugin opencode-tui-utils
 
 ## 添加更多工具
 
-新命令作为单独的插件模块放在 `src/plugins/` 下，并从 `src/index.tsx` 注册。
+新命令作为单独的插件模块放在 `src/plugins/` 下，并从 `src/index.tsx` 注册。如果有想添加的想法，请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 中的 Command Ideas 列表。
 
 ```text
 src/

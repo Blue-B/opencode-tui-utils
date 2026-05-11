@@ -10,9 +10,9 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/Blue-B/opencode-tui-utils/test.yml?branch=main&style=flat-square)](https://github.com/Blue-B/opencode-tui-utils/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-[opencode](https://opencode.ai) TUI에서 자주 필요한 작업을 작은 명령어로 추가하는 플러그인 패키지입니다. 첫 기능은 연결된 프로바이더를 안전하게 해제하는 `/disconnect` 명령입니다.
+opencode에 없는 필수 TUI 명령어를 제공합니다. 한 번 설치하고 JSON 파일 직접 편집은 그만하세요.
 
-이 프로젝트는 명령어를 하나씩 확장할 수 있도록 구성되어 있습니다. 각 유틸리티는 opencode TUI 안에서 한 가지 문제를 명확하게 해결하고, 검토와 테스트가 쉬운 형태를 유지하는 것을 기준으로 합니다.
+이 프로젝트는 명령어를 하나씩 확장합니다. 각 유틸리티는 opencode TUI가 이미 가지고 있지만 슬래시 명령어로 접근할 수 없는 데이터를 노출하는 것을 목표로 합니다(opencode issue #10494의 패턴).
 
 ## 미리보기
 
@@ -60,10 +60,25 @@ opencode를 재시작한 뒤 실행합니다.
 
 ## 명령어
 
+### 사용 가능
+
 | 명령어 | 별칭 | 설명 |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | 연결된 프로바이더 중 하나를 선택해 opencode 인증 저장소에서 제거합니다. 새 세션을 열어야 변경 사항이 반영됩니다. |
 | `/lsp-toggle` | — | `~/.config/opencode/opencode.json`의 `lsp` 설정을 true/false로 전환합니다. opencode 재시작 필요. |
+| `/plugin-list` | — | 설치된 플러그인과 활성화 상태를 보여줍니다. |
+| `/export-chat` | — | 현재 세션 대화를 프로젝트 디렉토리에 마크다운 파일로 저장합니다. |
+| `/session-diff` | — | 현재 세션에서 변경된 파일 목록을 보여줍니다. |
+| `/session-todos` | — | 현재 세션의 할 일 목록을 보여줍니다. |
+
+### 아이디어 및 기여 환영
+
+TUI가 이미 가지고 있지만 슬래시 명령어가 없는 데이터를 노출하는 후보입니다. 마음에 드는 아이디어가 있으면 이슈를 열어주세요.
+
+| 명령어 | 해결하는 문제 |
+| --- | --- |
+| `/provider-list` | "지금 뭐가 연결되어 있지?" — `/disconnect`의 read-only 버전 |
+| `/session-info` | "이 세션에 메시지가 몇 개 있지? 상태는?" |
 
 ## `/disconnect` 동작 방식
 
@@ -97,7 +112,7 @@ opencode를 재시작한 뒤 실행합니다.
 
 ## 유틸리티 확장 방법
 
-새 명령어는 `src/plugins/` 아래에 별도 플러그인 모듈로 추가하고, `src/index.tsx`에서 등록합니다.
+새 명령어는 `src/plugins/` 아래에 별도 플러그인 모듈로 추가하고, `src/index.tsx`에서 등록합니다. 추가할 아이디어가 있다면 [CONTRIBUTING.md](CONTRIBUTING.md)의 Command Ideas 목록을 확인해 주세요.
 
 ```text
 src/

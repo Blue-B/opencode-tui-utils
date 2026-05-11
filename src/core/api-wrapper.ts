@@ -11,6 +11,10 @@ export interface WrappedAPI {
   keymap: ReturnType<typeof createKeymapAPI>
   ui: ReturnType<typeof createUIAPI>
   kv: ReturnType<typeof createKVAPI>
+  plugins: TuiPluginApi["plugins"]
+  client: TuiPluginApi["client"]
+  route: TuiPluginApi["route"]
+  state: TuiPluginApi["state"]
 }
 
 /**
@@ -94,5 +98,9 @@ export function createWrappedAPI(api: TuiPluginApi): WrappedAPI {
     keymap: createKeymapAPI(api),
     ui: createUIAPI(api),
     kv: createKVAPI(api),
+    plugins: api.plugins,
+    client: api.client,
+    route: api.route,
+    state: api.state,
   }
 }

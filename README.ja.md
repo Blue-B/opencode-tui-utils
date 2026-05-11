@@ -10,9 +10,9 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/Blue-B/opencode-tui-utils/test.yml?branch=main&style=flat-square)](https://github.com/Blue-B/opencode-tui-utils/actions)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-[opencode](https://opencode.ai) のTUIで使う小さなユーティリティ集です。最初のコマンドは、接続済みプロバイダーを安全に解除する `/disconnect` です。
+opencodeに欠けているエッセンシャルなTUIコマンド。一度インストールすれば、JSONを手動で編集する必要はありません。
 
-このプロジェクトは、コマンドを1つずつ追加して育てる前提で構成されています。各ユーティリティは、opencode TUI内の明確な問題を1つ解決し、レビューとテストがしやすい形に保ちます。
+このプロジェクトはコマンドを1つずつ追加します。各ユーティリティは、opencode TUIが既に持っているがスラッシュコマンドでアクセスできないデータを公開することを目的としています(opencode issue #10494のパターン)。
 
 ## プレビュー
 
@@ -60,10 +60,25 @@ opencodeを再起動して実行します。
 
 ## コマンド
 
+### 利用可能
+
 | コマンド | エイリアス | 説明 |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | 接続済みプロバイダーを1つ選び、opencodeの認証ストレージから削除します。新しいセションを開くと変更が反映されます。 |
 | `/lsp-toggle` | — | `~/.config/opencode/opencode.json` の `lsp` 設定を true/false に切り替えます。opencodeの再起動が必要です。 |
+| `/plugin-list` | — | インストールされたプラグインとその有効状態を表示します。 |
+| `/export-chat` | — | 現在のセッションのチャットをプロジェクトディレクトリにマークダウンとして保存します。 |
+| `/session-diff` | — | 現在のセッションで変更されたファイル一覧を表示します。 |
+| `/session-todos` | — | 現在のセッションのタスク一覧を表示します。 |
+
+### アイデア・コントリビューション歓迎
+
+TUIが既に持っているがスラッシュコマンドでアクセスできないデータを公開する候補です。気に入ったアイデアがあればIssueを立ててください。
+
+| コマンド | 解決する問題 |
+| --- | --- |
+| `/provider-list` | "今何が接続されている？" — `/disconnect` の読み取り専用版 |
+| `/session-info` | "このセッションに何通のメッセージがある？状態は？" |
 
 ## `/disconnect` の動作
 
@@ -97,7 +112,7 @@ opencodeを再起動して実行します。
 
 ## ユーティリティの追加
 
-新しいコマンドは `src/plugins/` 配下に個別のプラグインモジュールとして追加し、`src/index.tsx`から登録します。
+新しいコマンドは `src/plugins/` 配下に個別のプラグインモジュールとして追加し、`src/index.tsx`から登録します。追加したいアイデアがあれば [CONTRIBUTING.md](CONTRIBUTING.md) の Command Ideas リストを確認してください。
 
 ```text
 src/
