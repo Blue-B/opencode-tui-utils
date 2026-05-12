@@ -1,7 +1,7 @@
 {
   "name": "opencode-tui-utils",
-  "version": "1.2.0",
-  "description": "Add /disconnect command to opencode - safely disconnect providers without editing auth.json",
+  "version": "1.3.0",
+  "description": "TUI slash commands for opencode provider auth, tool toggles, permissions, exports, and session utilities",
   "main": "src/index.tsx",
   "type": "module",
   "scripts": {
@@ -25,7 +25,11 @@
     "disconnect",
     "provider",
     "auth",
-    "copilot"
+    "copilot",
+    "lsp",
+    "websearch",
+    "permissions",
+    "export"
   ],
   "author": "Blue-B <source_vs@naver.com>",
   "license": "MIT",

@@ -58,6 +58,16 @@ Restart opencode and run:
 /disconnect
 ```
 
+To enable OpenCode's launch-gated research tools from the TUI, use:
+
+```text
+/lsp-toggle
+/websearch-toggle
+/tool-status
+```
+
+The toggle commands update your shell profile and show a restart notice. Open a new terminal and restart OpenCode for the changed tools to appear in the model's tool list.
+
 ## Commands
 
 ### Available
@@ -65,8 +75,11 @@ Restart opencode and run:
 | Command | Alias | Description |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | Pick one connected provider and remove it from opencode auth storage. Open a new session to reflect the change. |
-| `/lsp-toggle` | — | Toggle `lsp: true/false` in `~/.config/opencode/opencode.json`. Requires opencode restart. |
+| `/lsp-toggle` | — | Toggle LSP servers and the experimental `lsp` tool env together. Requires terminal/OpenCode restart. |
+| `/websearch-toggle` | — | Toggle `websearch` env for future OpenCode launches. Requires terminal/OpenCode restart. No API key needed. |
 | `/plugin-list` | — | Show installed plugins and their activation state. |
+| `/tool-status` | — | Show launch-gated OpenCode tool status for `websearch`, experimental `lsp`, and LSP servers. |
+| `/tool-env` | — | Advanced menu for launch-time env vars used by `websearch` and the experimental `lsp` tool. Requires terminal/OpenCode restart. |
 | `/export-chat` | — | Export the current session chat to a markdown file in the project directory. |
 | `/session-diff` | — | List files changed in the current session. |
 | `/session-todos` | — | Show pending todos for the current session. |
@@ -110,6 +123,29 @@ This started from the provider disconnect pain point discussed in [opencode issu
 
 `/disconnect` does not send network requests, copy token values, or print token values to the UI.
 
+## Tool Status Notes
+
+`/lsp-toggle` changes both parts needed for full LSP support:
+
+- `opencode.json` `lsp: true/false` for LSP servers
+- `OPENCODE_EXPERIMENTAL_LSP_TOOL=1` for the experimental LLM tool
+
+The equivalent manual launch flag is:
+
+```bash
+OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode
+```
+
+`/websearch-toggle` manages OpenCode's built-in `websearch` launch flag. OpenCode's docs state that no API key is required; it connects to Exa's hosted MCP service without authentication. The equivalent manual launch flag is:
+
+```bash
+OPENCODE_ENABLE_EXA=1 opencode
+```
+
+Use `/tool-status` to see the current config, shell profile, and live environment state. These are OpenCode built-in tools, not skills or user-configured MCP servers.
+
+Use `/tool-env` only when you want an advanced single menu for both launch-time env vars. For everyday use, prefer `/lsp-toggle` and `/websearch-toggle`.
+
 ## Adding More Utilities
 
 New commands are added as separate plugin modules under `src/plugins/` and registered from `src/index.tsx`.
@@ -121,6 +157,8 @@ src/
   plugins/
     disconnect.tsx      Provider disconnect command
     lsp-toggle.tsx      LSP toggle command
+    websearch-toggle.tsx Web search toggle command
+    tool-status.tsx     Tool status command
     your-command.tsx    Add new utilities here
   index.tsx             Public plugin entry point
 ```

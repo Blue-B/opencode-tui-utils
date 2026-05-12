@@ -3,6 +3,8 @@
  *
  * Toggles the `lsp` field in ~/.config/opencode/opencode.json between true/false.
  * This controls whether opencode starts Language Server Protocol support.
+ * It does not enable the experimental `lsp` LLM tool; that requires launching
+ * opencode with OPENCODE_EXPERIMENTAL_LSP_TOOL=true.
  *
  * Important: opencode reads config at startup. Changing the JSON file does NOT
  * hot-reload the setting. You must restart opencode after toggling for the
@@ -18,6 +20,7 @@ import { homedir } from "node:os"
 import { join } from "node:path"
 import { readFile, writeFile } from "node:fs/promises"
 import { createWrappedAPI } from "../core/api-wrapper"
+import { getShellProfilePath, readManagedToolEnv, writeManagedToolEnv } from "../core/tool-env"
 
 /** Resolve opencode.json path. Honors OPENCODE_CONFIG_DIR if set. */
 function getConfigPath() {
@@ -68,17 +71,21 @@ const plugin: TuiPluginModule & { id: string } = {
                     : "LSP is currently disabled. Enable it?"
                 }
                 onConfirm={async () => {
-                  config.lsp = !isEnabled
+                  const nextEnabled = !isEnabled
+                  config.lsp = nextEnabled
                   await saveConfig(config)
+                  const env = await readManagedToolEnv()
+                  if (nextEnabled) env.add("lspTool")
+                  else env.delete("lspTool")
+                  await writeManagedToolEnv(env)
                   api.ui.dialog.clear()
 
-                  const nextEnabled = !isEnabled
                   api.ui.toast({
                     variant: nextEnabled ? "success" : "info",
                     title: nextEnabled ? "LSP Enabled" : "LSP Disabled",
                     message: nextEnabled
-                      ? "LSP turned on. Restart opencode to apply."
-                      : "LSP turned off. Restart opencode to apply.",
+                      ? `LSP servers and LSP tool env turned on. Restart terminal/opencode to apply. Updated ${getShellProfilePath()}.`
+                      : `LSP servers and LSP tool env turned off. Restart terminal/opencode to apply. Updated ${getShellProfilePath()}.`,
                   })
                 }}
                 onCancel={() => {

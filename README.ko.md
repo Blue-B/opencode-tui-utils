@@ -58,6 +58,16 @@ opencode를 재시작한 뒤 실행합니다.
 /disconnect
 ```
 
+OpenCode의 시작 시점 도구를 TUI에서 켜려면 아래 명령을 사용합니다.
+
+```text
+/lsp-toggle
+/websearch-toggle
+/tool-status
+```
+
+토글 명령은 shell profile을 수정하고 재시작 안내를 띄웁니다. 새 터미널을 열고 OpenCode를 재시작해야 모델의 tool 목록에 반영됩니다.
+
 ## 명령어
 
 ### 사용 가능
@@ -65,8 +75,11 @@ opencode를 재시작한 뒤 실행합니다.
 | 명령어 | 별칭 | 설명 |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | 연결된 프로바이더 중 하나를 선택해 opencode 인증 저장소에서 제거합니다. 새 세션을 열어야 변경 사항이 반영됩니다. |
-| `/lsp-toggle` | — | `~/.config/opencode/opencode.json`의 `lsp` 설정을 true/false로 전환합니다. opencode 재시작 필요. |
+| `/lsp-toggle` | — | LSP 서버와 experimental `lsp` tool 환경변수를 함께 전환합니다. 터미널/opencode 재시작 필요. |
+| `/websearch-toggle` | — | 다음 OpenCode 실행용 `websearch` 환경변수를 전환합니다. 터미널/opencode 재시작 필요. API 키 불필요. |
 | `/plugin-list` | — | 설치된 플러그인과 활성화 상태를 보여줍니다. |
+| `/tool-status` | — | `websearch`, experimental `lsp`, LSP 서버처럼 시작 시점에 결정되는 OpenCode 도구 상태를 보여줍니다. |
+| `/tool-env` | — | `websearch`와 experimental `lsp` tool 시작 환경변수를 한 메뉴에서 관리합니다. 터미널/opencode 재시작 필요. |
 | `/export-chat` | — | 현재 세션 대화를 프로젝트 디렉토리에 마크다운 파일로 저장합니다. |
 | `/session-diff` | — | 현재 세션에서 변경된 파일 목록을 보여줍니다. |
 | `/session-todos` | — | 현재 세션의 할 일 목록을 보여줍니다. |
@@ -110,6 +123,29 @@ TUI가 이미 가지고 있지만 슬래시 명령어가 없는 데이터를 노
 
 `/disconnect`는 네트워크 요청을 보내지 않고, 토큰 값을 복사하거나 UI에 출력하지 않습니다.
 
+## 도구 상태 참고
+
+`/lsp-toggle`은 LSP 전체 사용에 필요한 두 가지를 함께 바꿉니다.
+
+- `opencode.json`의 `lsp: true/false`: LSP 서버 설정
+- `OPENCODE_EXPERIMENTAL_LSP_TOOL=1`: experimental LLM tool 설정
+
+직접 실행할 때의 동등한 환경변수는 아래와 같습니다.
+
+```bash
+OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode
+```
+
+`/websearch-toggle`은 OpenCode built-in `websearch` 시작 플래그를 관리합니다. OpenCode 문서 기준 API 키는 필요 없고, Exa hosted MCP service에 인증 없이 연결합니다. 직접 실행할 때의 동등한 환경변수는 아래와 같습니다.
+
+```bash
+OPENCODE_ENABLE_EXA=1 opencode
+```
+
+`/tool-status`로 현재 config, shell profile, live environment 상태를 확인할 수 있습니다. 이것들은 skills나 사용자가 등록한 MCP 서버가 아니라 OpenCode built-in tools입니다.
+
+`/tool-env`는 두 시작 환경변수를 한 메뉴에서 관리하고 싶을 때 쓰는 고급 메뉴입니다. 평소에는 `/lsp-toggle`, `/websearch-toggle`을 쓰면 됩니다.
+
 ## 유틸리티 확장 방법
 
 새 명령어는 `src/plugins/` 아래에 별도 플러그인 모듈로 추가하고, `src/index.tsx`에서 등록합니다. 추가할 아이디어가 있다면 [CONTRIBUTING.md](CONTRIBUTING.md)의 Command Ideas 목록을 확인해 주세요.
@@ -121,6 +157,8 @@ src/
   plugins/
     disconnect.tsx      프로바이더 해제 명령어
     lsp-toggle.tsx      LSP 전환 명령어
+    websearch-toggle.tsx 웹검색 전환 명령어
+    tool-status.tsx     도구 상태 확인 명령어
     your-command.tsx    새 유틸리티 추가 위치
   index.tsx             공개 플러그인 진입점
 ```

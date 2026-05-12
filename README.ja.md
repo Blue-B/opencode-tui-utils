@@ -58,6 +58,16 @@ opencodeを再起動して実行します。
 /disconnect
 ```
 
+OpenCodeの起動時ツールをTUIから有効化するには、次のコマンドを使います。
+
+```text
+/lsp-toggle
+/websearch-toggle
+/tool-status
+```
+
+toggleコマンドはshell profileを更新し、再起動が必要であることを通知します。新しいterminalを開いてOpenCodeを再起動すると、modelのtool一覧に反映されます。
+
 ## コマンド
 
 ### 利用可能
@@ -65,8 +75,11 @@ opencodeを再起動して実行します。
 | コマンド | エイリアス | 説明 |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | 接続済みプロバイダーを1つ選び、opencodeの認証ストレージから削除します。新しいセションを開くと変更が反映されます。 |
-| `/lsp-toggle` | — | `~/.config/opencode/opencode.json` の `lsp` 設定を true/false に切り替えます。opencodeの再起動が必要です。 |
+| `/lsp-toggle` | — | LSPサーバーとexperimental `lsp` tool用の環境変数を一緒に切り替えます。terminal/OpenCodeの再起動が必要です。 |
+| `/websearch-toggle` | — | 次回OpenCode起動用の`websearch`環境変数を切り替えます。terminal/OpenCodeの再起動が必要です。API keyは不要です。 |
 | `/plugin-list` | — | インストールされたプラグインとその有効状態を表示します。 |
+| `/tool-status` | — | `websearch`、experimental `lsp`、LSPサーバーなど、起動時に決まるOpenCodeツールの状態を表示します。 |
+| `/tool-env` | — | `websearch` と experimental `lsp` tool用の起動時環境変数を1つのmenuで管理します。terminal/OpenCodeの再起動が必要です。 |
 | `/export-chat` | — | 現在のセッションのチャットをプロジェクトディレクトリにマークダウンとして保存します。 |
 | `/session-diff` | — | 現在のセッションで変更されたファイル一覧を表示します。 |
 | `/session-todos` | — | 現在のセッションのタスク一覧を表示します。 |
@@ -110,6 +123,29 @@ TUIが既に持っているがスラッシュコマンドでアクセスでき�
 
 `/disconnect`はネットワークリクエストを送らず、トークン値をコピーしたりUIに出力したりしません。
 
+## ツール状態メモ
+
+`/lsp-toggle` はLSPを完全に使うために必要な2つの設定を一緒に変更します。
+
+- `opencode.json` の `lsp: true/false`: LSPサーバー設定
+- `OPENCODE_EXPERIMENTAL_LSP_TOOL=1`: experimental LLM tool設定
+
+手動で起動する場合の同等の環境変数は次の通りです。
+
+```bash
+OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode
+```
+
+`/websearch-toggle` はOpenCode built-in `websearch` の起動フラグを管理します。OpenCode docsによるとAPI keyは不要で、Exa hosted MCP serviceへ認証なしで接続します。手動で起動する場合の同等の環境変数は次の通りです。
+
+```bash
+OPENCODE_ENABLE_EXA=1 opencode
+```
+
+`/tool-status` で現在のconfig、shell profile、live environmentの状態を確認できます。これらはskillsやユーザー設定のMCPサーバーではなく、OpenCode built-in toolsです。
+
+`/tool-env` は2つの起動時環境変数を1つのmenuで管理したい場合のadvanced menuです。普段は `/lsp-toggle` と `/websearch-toggle` を使ってください。
+
 ## ユーティリティの追加
 
 新しいコマンドは `src/plugins/` 配下に個別のプラグインモジュールとして追加し、`src/index.tsx`から登録します。追加したいアイデアがあれば [CONTRIBUTING.md](CONTRIBUTING.md) の Command Ideas リストを確認してください。
@@ -121,6 +157,8 @@ src/
   plugins/
     disconnect.tsx      プロバイダー解除コマンド
     lsp-toggle.tsx      LSP切り替えコマンド
+    websearch-toggle.tsx Web search切り替えコマンド
+    tool-status.tsx     Tool statusコマンド
     your-command.tsx    新しいユーティリティの追加先
   index.tsx             公開プラグインエントリ
 ```

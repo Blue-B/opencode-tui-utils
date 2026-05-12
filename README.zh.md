@@ -58,6 +58,16 @@ opencode plugin opencode-tui-utils
 /disconnect
 ```
 
+要从 TUI 启用 OpenCode 的启动时 tool，请使用：
+
+```text
+/lsp-toggle
+/websearch-toggle
+/tool-status
+```
+
+toggle 命令会更新 shell profile 并提示需要重启。打开新的 terminal 并重启 OpenCode 后，变更才会出现在模型的 tool 列表中。
+
 ## 命令
 
 ### 可用
@@ -65,8 +75,11 @@ opencode plugin opencode-tui-utils
 | 命令 | 别名 | 说明 |
 | --- | --- | --- |
 | `/disconnect` | `/dc` | 选择一个已连接的 provider，并从 opencode 的认证存储中移除。需要打开新会话才能看到变更。 |
-| `/lsp-toggle` | — | 切换 `~/.config/opencode/opencode.json` 中的 `lsp` 设置。需要重启 opencode。 |
+| `/lsp-toggle` | — | 同时切换 LSP server 和 experimental `lsp` tool 环境变量。需要重启 terminal/OpenCode。 |
+| `/websearch-toggle` | — | 切换下次 OpenCode 启动使用的 `websearch` 环境变量。需要重启 terminal/OpenCode。不需要 API key。 |
 | `/plugin-list` | — | 显示已安装的插件及其激活状态。 |
+| `/tool-status` | — | 显示 `websearch`、experimental `lsp`、LSP server 等启动时决定的 OpenCode tool 状态。 |
+| `/tool-env` | — | 在一个 menu 中管理 `websearch` 和 experimental `lsp` tool 的启动环境变量。需要重启 terminal/OpenCode。 |
 | `/export-chat` | — | 将当前会话的聊天记录导出为项目目录中的 Markdown 文件。 |
 | `/session-diff` | — | 列出当前会话中已更改的文件。 |
 | `/session-todos` | — | 显示当前会话的待办事项列表。 |
@@ -110,6 +123,29 @@ opencode plugin opencode-tui-utils
 
 `/disconnect` 不会发送网络请求，不会复制 token 值，也不会把 token 值显示在 UI 中。
 
+## Tool 状态说明
+
+`/lsp-toggle` 会同时修改完整 LSP 支持需要的两部分。
+
+- `opencode.json` 中的 `lsp: true/false`：LSP server 设置
+- `OPENCODE_EXPERIMENTAL_LSP_TOOL=1`：experimental LLM tool 设置
+
+手动启动时等价的环境变量如下。
+
+```bash
+OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode
+```
+
+`/websearch-toggle` 管理 OpenCode built-in `websearch` 的启动 flag。根据 OpenCode docs，不需要 API key；它会无认证连接到 Exa hosted MCP service。手动启动时等价的环境变量如下。
+
+```bash
+OPENCODE_ENABLE_EXA=1 opencode
+```
+
+可以用 `/tool-status` 查看当前 config、shell profile 和 live environment 状态。这些是 OpenCode built-in tools，不是 skills 或用户配置的 MCP server。
+
+`/tool-env` 是在一个 menu 中管理两个启动环境变量的 advanced menu。日常使用请优先使用 `/lsp-toggle` 和 `/websearch-toggle`。
+
 ## 添加更多工具
 
 新命令作为单独的插件模块放在 `src/plugins/` 下，并从 `src/index.tsx` 注册。如果有想添加的想法，请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 中的 Command Ideas 列表。
@@ -121,6 +157,8 @@ src/
   plugins/
     disconnect.tsx      Provider 断开命令
     lsp-toggle.tsx      LSP 切换命令
+    websearch-toggle.tsx Web search 切换命令
+    tool-status.tsx     Tool status 命令
     your-command.tsx    新工具放在这里
   index.tsx             公开插件入口
 ```
